@@ -34,30 +34,37 @@ export const authenticate = async (req, res, next) => {
 };
 
 export const restrict = (roles) => async (req, res, next) => {
+  const userRole = req.role; // Get role from JWT token set by authenticate middleware
   const userId = req.userId;
+  
+  // Debug logging
+  console.log('Restriction check:', {
+    userRole,
+    userId,
+    requiredRoles: roles,
+    hasRole: roles.includes(userRole)
+  });
 
+  // Verify user exists in database
   let user;
-
-  const faculty = await Faculty.findById(userId);
-  const ta = await TA.findById(userId);
-  const student = await Student.findById(userId);
-
-  if (faculty) {
-    user = faculty;
+  if (userRole === 'Faculty') {
+    user = await Faculty.findById(userId);
+  } else if (userRole === 'TA') {
+    user = await TA.findById(userId);
+  } else if (userRole === 'Student') {
+    user = await Student.findById(userId);
   }
 
-  if (ta) {
-    user = ta;
-  }
-
-  if (student) {
-    user = student;
-  }
-
-  if (!roles.includes(user.role)) {
+  if (!user) {
     return res
       .status(401)
-      .json({ success: false, message: "You're not authorized" });
+      .json({ success: false, message: "User not found" });
+  }
+
+  if (!roles.includes(userRole)) {
+    return res
+      .status(403)
+      .json({ success: false, message: "You're not authorized to access this resource" });
   }
 
   next();

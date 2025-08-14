@@ -6,6 +6,8 @@ import mongoose from 'mongoose'
 import authRoute from './Routes/auth.js' 
 import gradingRoute from './Routes/grading.js'
 import studentRoute from './Routes/student.js'
+import facultyRoute from './Routes/faculty.js'
+import taRoute from './Routes/ta.js'
 
 dotenv.config()
 
@@ -17,7 +19,7 @@ const corsOptions = {
 };
 
 app.get("/", (req, res) => {
-    res.send("Api is working")
+    res.send("AI Grading Platform API is working")
 })
 
 //database connection
@@ -35,9 +37,13 @@ const connectDB = async () => {
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors(corsOptions))
+
+// Routes
 app.use('/auth', authRoute)
 app.use('/grading', gradingRoute)
 app.use('/students', studentRoute)
+app.use('/faculty', facultyRoute)
+app.use('/ta', taRoute)
 
 app.listen(port, () => {
     connectDB()
